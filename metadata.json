@@ -1,0 +1,6 @@
+{
+  "name": "MedVelo Courier",
+  "description": "Medical courier service platform for real-time shipment tracking, secure delivery, and automated healthcare provider notifications in Oklahoma.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
