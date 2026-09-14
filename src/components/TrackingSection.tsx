@@ -18,8 +18,19 @@ import {
   Fingerprint,
   Phone,
   RefreshCw,
+  Activity,
+  Navigation,
+  Sliders,
+  Eye,
+  Layers,
+  Settings,
+  Smartphone,
+  Mail,
+  Zap,
 } from 'lucide-react';
-import { Shipment, ProviderNotification, ShipmentStatus } from '../types';
+import { Shipment, ProviderNotification, ShipmentStatus, NotificationPreferences } from '../types';
+import { ShipmentTrackingMap } from './ShipmentTrackingMap';
+import { NotificationSettingsModal } from './NotificationSettingsModal';
 
 interface TrackingSectionProps {
   shipments: Shipment[];
@@ -28,6 +39,11 @@ interface TrackingSectionProps {
   onAddNotification: (notification: ProviderNotification) => void;
   onUpdateShipmentStatus: (trackingNumber: string, nextStatus: ShipmentStatus) => void;
   onRequestNewPickup: () => void;
+  userCreatedTrackingId?: string | null;
+  onUpdateNotificationPreferences?: (
+    trackingNumber: string,
+    preferences: NotificationPreferences
+  ) => void;
 }
 
 export const TrackingSection: React.FC<TrackingSectionProps> = ({
@@ -37,9 +53,13 @@ export const TrackingSection: React.FC<TrackingSectionProps> = ({
   onAddNotification,
   onUpdateShipmentStatus,
   onRequestNewPickup,
+  userCreatedTrackingId,
+  onUpdateNotificationPreferences,
 }) => {
   const [searchInput, setSearchInput] = useState(selectedTrackingNumber || 'MV-OKC-9824');
   const [showPhiManifestModal, setShowPhiManifestModal] = useState(false);
+  const [isNotificationModalOpen, setIsNotificationModalOpen] = useState(false);
+  const [viewMode, setViewMode] = useState<'both' | 'map' | 'details'>('both');
   const [activeTab, setActiveTab] = useState<'timeline' | 'provider_alerts' | 'chain_of_custody'>('timeline');
   const [testNotificationSent, setTestNotificationSent] = useState(false);
 
@@ -98,20 +118,79 @@ export const TrackingSection: React.FC<TrackingSectionProps> = ({
 
   const currentIndex = getStatusStepIndex(currentShipment.status);
 
+  // Automated notification dispatcher
+  const handleSendAutomatedAlert = (
+    shipment: Shipment,
+    targetStatus: ShipmentStatus,
+    channels: { sms: boolean; email: boolean }
+  ) => {
+    const statusLabels: Record<ShipmentStatus, string> = {
+      order_received: 'Order Received & Logged',
+      courier_dispatched: 'Courier En Route to Facility',
+      en_route_pickup: 'Courier Arrived at Facility Intake',
+      picked_up: 'Specimen Secured & Verified',
+      in_transit: 'In Transit with Active Telemetry',
+      delivered: 'Delivered & Dual-Party Signed',
+    };
+
+    const contactName =
+      shipment.notificationPreferences?.designatedContactName ||
+      shipment.contactPersonTo ||
+      'Attending Clinical Contact';
+    const phone =
+      shipment.notificationPreferences?.designatedPhone || shipment.phoneTo || '(405) 297-5000';
+    const email =
+      shipment.notificationPreferences?.designatedEmail ||
+      shipment.emailTo ||
+      'intake@facility.com';
+
+    if (channels.sms) {
+      onAddNotification({
+        id: `notif-sms-${Date.now()}`,
+        timestamp: 'Just Now',
+        channel: 'SMS',
+        recipient: `${phone} (${contactName})`,
+        type: targetStatus === 'delivered' ? 'delivered_signature' : 'status_update',
+        title: `Automated SMS: Status ${statusLabels[targetStatus]}`,
+        message: `[MedVelo SMS Alert] Attn: ${contactName}. Shipment ID ${shipment.trackingNumber} status updated to: ${statusLabels[targetStatus]}. Location: Oklahoma Medical Corridor. Temp: ${shipment.currentTempCelsius ?? 3.8}°C. Verified by Courier ${shipment.courier.name}.`,
+        isRead: false,
+        details: {
+          shipmentId: shipment.trackingNumber,
+          currentStatus: statusLabels[targetStatus],
+          facilityName: shipment.facilityTo,
+          contactPerson: contactName,
+          phone: phone,
+        },
+      });
+    }
+
+    if (channels.email) {
+      onAddNotification({
+        id: `notif-email-${Date.now()}`,
+        timestamp: 'Just Now',
+        channel: 'Email',
+        recipient: email,
+        type: targetStatus === 'delivered' ? 'delivered_signature' : 'status_update',
+        title: `Automated Email: Shipment ${shipment.trackingNumber} ${statusLabels[targetStatus]}`,
+        message: `Automated MedVelo dispatch notification for ${shipment.facilityTo}. Shipment ID: ${shipment.trackingNumber}. Current Status: ${statusLabels[targetStatus]}. Courier: ${shipment.courier.name} (${shipment.courier.badgeId}). Temperature: ${shipment.currentTempCelsius ?? 3.8}°C. Chain of Custody Audit: ${shipment.patientRecordHandling.chainOfCustodyAuditCode}.`,
+        isRead: false,
+        details: {
+          shipmentId: shipment.trackingNumber,
+          currentStatus: statusLabels[targetStatus],
+          facilityName: shipment.facilityTo,
+          contactPerson: contactName,
+          email: email,
+        },
+      });
+    }
+  };
+
   // Quick simulation trigger for testing healthcare provider notifications
   const handleSimulateProviderAlert = () => {
-    const alertId = `notif-${Date.now()}`;
-    const newNotif: ProviderNotification = {
-      id: alertId,
-      timestamp: 'Just Now',
-      channel: 'SMS',
-      recipient: currentShipment.phoneTo,
-      type: 'in_transit_temp',
-      title: `Automated Status Alert · ${currentShipment.trackingNumber}`,
-      message: `MedVelo Update: Courier ${currentShipment.courier.name} is 1.4 miles from ${currentShipment.facilityTo}. Temperature telemetry locked at ${currentShipment.currentTempCelsius ?? 3.8}°C (Verified).`,
-      isRead: false,
-    };
-    onAddNotification(newNotif);
+    handleSendAutomatedAlert(currentShipment, currentShipment.status, {
+      sms: currentShipment.notificationPreferences?.sendSms ?? true,
+      email: currentShipment.notificationPreferences?.sendEmail ?? true,
+    });
     setTestNotificationSent(true);
     setTimeout(() => setTestNotificationSent(false), 3000);
   };
@@ -127,7 +206,8 @@ export const TrackingSection: React.FC<TrackingSectionProps> = ({
     ];
     const curIdx = order.indexOf(currentShipment.status);
     const nextIdx = (curIdx + 1) % order.length;
-    onUpdateShipmentStatus(currentShipment.trackingNumber, order[nextIdx]);
+    const nextStatus = order[nextIdx];
+    onUpdateShipmentStatus(currentShipment.trackingNumber, nextStatus);
   };
 
   return (
@@ -136,7 +216,7 @@ export const TrackingSection: React.FC<TrackingSectionProps> = ({
         {/* Section Header */}
         <div className="text-center max-w-3xl mx-auto space-y-4">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-100 border border-sky-200 text-xs font-bold text-sky-800 uppercase tracking-wider">
-            <ActivityIcon className="w-3.5 h-3.5 text-sky-600" />
+            <Activity className="w-3.5 h-3.5 text-sky-600" />
             <span>Real-Time Healthcare Provider Portal</span>
           </div>
           <h2 className="text-3xl sm:text-4xl font-black text-slate-900 font-display tracking-tight">
@@ -198,69 +278,158 @@ export const TrackingSection: React.FC<TrackingSectionProps> = ({
           </div>
         </div>
 
+        {/* View Mode Switcher & Client Notification Quick Banner */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div className="flex items-center gap-1.5 p-1 bg-white rounded-2xl border border-slate-200 shadow-xs">
+            <button
+              id="view-mode-both-btn"
+              type="button"
+              onClick={() => setViewMode('both')}
+              className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+                viewMode === 'both'
+                  ? 'bg-slate-900 text-white shadow-xs'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+              }`}
+            >
+              <Layers className="w-3.5 h-3.5" />
+              <span>Dual View (Map & Details)</span>
+            </button>
+
+            <button
+              id="view-mode-map-btn"
+              type="button"
+              onClick={() => setViewMode('map')}
+              className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+                viewMode === 'map'
+                  ? 'bg-sky-600 text-white shadow-xs'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+              }`}
+            >
+              <Navigation className="w-3.5 h-3.5" />
+              <span>Real-Time Fleet Map</span>
+            </button>
+
+            <button
+              id="view-mode-details-btn"
+              type="button"
+              onClick={() => setViewMode('details')}
+              className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+                viewMode === 'details'
+                  ? 'bg-slate-900 text-white shadow-xs'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+              }`}
+            >
+              <FileText className="w-3.5 h-3.5" />
+              <span>Clinical Custody Manifest</span>
+            </button>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2">
+            {userCreatedTrackingId && (
+              <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold">
+                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                <span>Client Pickup #{userCreatedTrackingId} Active</span>
+              </div>
+            )}
+            <button
+              id="open-notification-settings-quick-btn"
+              type="button"
+              onClick={() => setIsNotificationModalOpen(true)}
+              className="px-3 py-1.5 rounded-xl bg-sky-50 hover:bg-sky-100 text-sky-800 border border-sky-200 text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer"
+            >
+              <Bell className="w-3.5 h-3.5 text-sky-600" />
+              <span>Notification Settings</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Real-time Tracking Map (Google Maps / Fallback Vector Engine) */}
+        {(viewMode === 'both' || viewMode === 'map') && (
+          <div className="space-y-3">
+            <ShipmentTrackingMap
+              shipments={shipments}
+              selectedTrackingNumber={currentShipment.trackingNumber}
+              onSelectTracking={onSelectTracking}
+              onSimulateNotification={() => setIsNotificationModalOpen(true)}
+              userCreatedTrackingId={userCreatedTrackingId}
+            />
+          </div>
+        )}
+
         {/* Main Tracking Details Dashboard */}
-        <div className="bg-white rounded-3xl shadow-lg border border-slate-200 overflow-hidden">
-          {/* Top Shipment Bar */}
-          <div className="p-6 sm:p-8 bg-gradient-to-r from-slate-900 via-slate-850 to-slate-900 text-white">
-            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
-              <div>
-                <div className="flex flex-wrap items-center gap-2.5 mb-2">
-                  <span className="text-xs font-mono px-2.5 py-1 rounded-md bg-slate-800 text-sky-300 border border-slate-700 font-bold">
-                    {currentShipment.trackingNumber}
-                  </span>
-                  <span className="text-xs font-mono px-2.5 py-1 rounded-md bg-slate-800 text-slate-300 border border-slate-700">
-                    Requisition: {currentShipment.requisitionId}
-                  </span>
-                  <span
-                    className={`text-xs font-bold px-2.5 py-1 rounded-full flex items-center gap-1.5 ${
-                      currentShipment.status === 'delivered'
-                        ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
-                        : 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
-                    }`}
-                  >
+        {(viewMode === 'both' || viewMode === 'details') && (
+          <div className="bg-white rounded-3xl shadow-lg border border-slate-200 overflow-hidden">
+            {/* Top Shipment Bar */}
+            <div className="p-6 sm:p-8 bg-gradient-to-r from-slate-900 via-slate-850 to-slate-900 text-white">
+              <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+                <div>
+                  <div className="flex flex-wrap items-center gap-2.5 mb-2">
+                    <span className="text-xs font-mono px-2.5 py-1 rounded-md bg-slate-800 text-sky-300 border border-slate-700 font-bold">
+                      {currentShipment.trackingNumber}
+                    </span>
+                    <span className="text-xs font-mono px-2.5 py-1 rounded-md bg-slate-800 text-slate-300 border border-slate-700">
+                      Requisition: {currentShipment.requisitionId}
+                    </span>
                     <span
-                      className={`w-2 h-2 rounded-full ${
+                      className={`text-xs font-bold px-2.5 py-1 rounded-full flex items-center gap-1.5 ${
                         currentShipment.status === 'delivered'
-                          ? 'bg-emerald-400'
-                          : 'bg-amber-400 animate-ping'
+                          ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
+                          : 'bg-amber-500/20 text-amber-300 border border-amber-500/30'
                       }`}
-                    ></span>
-                    {currentShipment.status.replace('_', ' ').toUpperCase()}
-                  </span>
+                    >
+                      <span
+                        className={`w-2 h-2 rounded-full ${
+                          currentShipment.status === 'delivered'
+                            ? 'bg-emerald-400'
+                            : 'bg-amber-400 animate-ping'
+                        }`}
+                      ></span>
+                      {currentShipment.status.replace('_', ' ').toUpperCase()}
+                    </span>
+                  </div>
+                  <h3 className="text-2xl font-extrabold text-white font-display">
+                    {currentShipment.deliveryType}
+                  </h3>
+                  <p className="text-sm text-slate-400 mt-1 flex items-center gap-2">
+                    <span>Priority: {currentShipment.priority}</span>
+                    <span>•</span>
+                    <span>Target Range: {currentShipment.targetTempRange}</span>
+                  </p>
                 </div>
-                <h3 className="text-2xl font-extrabold text-white font-display">
-                  {currentShipment.deliveryType}
-                </h3>
-                <p className="text-sm text-slate-400 mt-1 flex items-center gap-2">
-                  <span>Priority: {currentShipment.priority}</span>
-                  <span>•</span>
-                  <span>Target Range: {currentShipment.targetTempRange}</span>
-                </p>
-              </div>
 
-              {/* Action Buttons for Healthcare Provider Testing */}
-              <div className="flex flex-wrap items-center gap-3">
-                <button
-                  id="simulate-provider-alert-btn"
-                  onClick={handleSimulateProviderAlert}
-                  className="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-sky-300 border border-slate-700 text-xs font-bold flex items-center gap-2 transition-all cursor-pointer"
-                  title="Simulate automated SMS/Email dispatch notification to hospital staff"
-                >
-                  <Send className="w-3.5 h-3.5 text-sky-400" />
-                  <span>{testNotificationSent ? 'Alert Dispatched!' : 'Simulate Provider Alert'}</span>
-                </button>
+                {/* Action Buttons for Healthcare Provider Testing & Notification Setup */}
+                <div className="flex flex-wrap items-center gap-3">
+                  <button
+                    id="open-notification-settings-btn"
+                    onClick={() => setIsNotificationModalOpen(true)}
+                    className="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-750 text-amber-300 border border-amber-500/30 text-xs font-bold flex items-center gap-2 transition-all cursor-pointer shadow-xs"
+                    title="Configure automated SMS & Email alerts for designated facility staff"
+                  >
+                    <Bell className="w-3.5 h-3.5 text-amber-400" />
+                    <span>Notification System</span>
+                  </button>
 
-                <button
-                  id="advance-status-simulation-btn"
-                  onClick={handleAdvanceStatus}
-                  className="px-4 py-2.5 rounded-xl bg-sky-600 hover:bg-sky-500 text-white text-xs font-bold flex items-center gap-2 transition-all cursor-pointer shadow-md"
-                  title="Cycle status step to simulate live delivery progression"
-                >
-                  <RefreshCw className="w-3.5 h-3.5" />
-                  <span>Next Status Step</span>
-                </button>
+                  <button
+                    id="simulate-provider-alert-btn"
+                    onClick={handleSimulateProviderAlert}
+                    className="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-sky-300 border border-slate-700 text-xs font-bold flex items-center gap-2 transition-all cursor-pointer"
+                    title="Simulate automated SMS/Email dispatch notification to hospital staff"
+                  >
+                    <Send className="w-3.5 h-3.5 text-sky-400" />
+                    <span>{testNotificationSent ? 'Alert Dispatched!' : 'Simulate Provider Alert'}</span>
+                  </button>
+
+                  <button
+                    id="advance-status-simulation-btn"
+                    onClick={handleAdvanceStatus}
+                    className="px-4 py-2.5 rounded-xl bg-sky-600 hover:bg-sky-500 text-white text-xs font-bold flex items-center gap-2 transition-all cursor-pointer shadow-md"
+                    title="Cycle status step to simulate live delivery progression"
+                  >
+                    <RefreshCw className="w-3.5 h-3.5" />
+                    <span>Next Status Step</span>
+                  </button>
+                </div>
               </div>
-            </div>
 
             {/* Stepper Progress Visualizer */}
             <div className="mt-8 pt-6 border-t border-slate-750">
@@ -672,7 +841,8 @@ export const TrackingSection: React.FC<TrackingSectionProps> = ({
             )}
           </div>
         </div>
-      </div>
+      )}
+    </div>
 
       {/* Compliance Certificate Modal */}
       {showPhiManifestModal && (
@@ -736,22 +906,19 @@ export const TrackingSection: React.FC<TrackingSectionProps> = ({
           </div>
         </div>
       )}
+
+      {/* Automated Healthcare Notification Settings & Test Alert Modal */}
+      <NotificationSettingsModal
+        isOpen={isNotificationModalOpen}
+        onClose={() => setIsNotificationModalOpen(false)}
+        shipment={currentShipment}
+        onUpdatePreferences={(newPrefs) => {
+          if (onUpdateNotificationPreferences) {
+            onUpdateNotificationPreferences(currentShipment.trackingNumber, newPrefs);
+          }
+        }}
+        onSendAutomatedAlert={handleSendAutomatedAlert}
+      />
     </section>
   );
 };
-
-function ActivityIcon(props: React.SVGProps<SVGSVGElement>) {
-  return (
-    <svg
-      {...props}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
-    </svg>
-  );
-}

@@ -11,12 +11,30 @@ import { Footer } from './components/Footer';
 import { ProviderNotificationsDrawer } from './components/ProviderNotificationsDrawer';
 import { PartnerModal } from './components/PartnerModal';
 import { INITIAL_SHIPMENTS } from './data/mockShipments';
-import { Shipment, ProviderNotification, DeliveryType, ShipmentStatus } from './types';
+import {
+  Shipment,
+  ProviderNotification,
+  DeliveryType,
+  ShipmentStatus,
+  NotificationPreferences,
+} from './types';
+import { Bell, Smartphone, Mail, X } from 'lucide-react';
 
 export default function App() {
   const [activeSection, setActiveSection] = useState<string>('home');
   const [shipments, setShipments] = useState<Shipment[]>(INITIAL_SHIPMENTS);
   const [selectedTrackingNumber, setSelectedTrackingNumber] = useState<string>('MV-OKC-9824');
+  const [userCreatedTrackingId, setUserCreatedTrackingId] = useState<string | null>(null);
+
+  // Status update toast alert
+  const [statusToast, setStatusToast] = useState<{
+    show: boolean;
+    title: string;
+    message: string;
+    shipmentId: string;
+    status: string;
+    recipient: string;
+  } | null>(null);
   
   // Aggregate notifications from all shipments + new system broadcasts
   const [notifications, setNotifications] = useState<ProviderNotification[]>(() => {
@@ -81,9 +99,19 @@ export default function App() {
   const handlePickupCreated = (newShipment: Shipment) => {
     setShipments((prev) => [newShipment, ...prev]);
     setSelectedTrackingNumber(newShipment.trackingNumber);
+    setUserCreatedTrackingId(newShipment.trackingNumber);
     if (newShipment.notifications.length > 0) {
       setNotifications((prev) => [...newShipment.notifications, ...prev]);
     }
+  };
+
+  const handleUpdateNotificationPreferences = (
+    trackingNumber: string,
+    preferences: NotificationPreferences
+  ) => {
+    setShipments((prev) =>
+      prev.map((s) => (s.trackingNumber === trackingNumber ? { ...s, notificationPreferences: preferences } : s))
+    );
   };
 
   const handleAddNotification = (newNotif: ProviderNotification) => {
@@ -103,24 +131,77 @@ export default function App() {
   };
 
   const handleUpdateShipmentStatus = (trackingNumber: string, nextStatus: ShipmentStatus) => {
+    const statusLabels: Record<ShipmentStatus, string> = {
+      order_received: 'Order Received & Logged',
+      courier_dispatched: 'Courier En Route to Facility',
+      en_route_pickup: 'Courier Arrived at Facility Intake',
+      picked_up: 'Specimen Secured & Verified',
+      in_transit: 'In Transit with Active Telemetry',
+      delivered: 'Delivered & Dual-Party Signed',
+    };
+
+    const targetShipment = shipments.find((s) => s.trackingNumber === trackingNumber);
+    const prefs = targetShipment?.notificationPreferences;
+    const designatedName = prefs?.designatedContactName || targetShipment?.contactPersonTo || 'Attending Clinical Staff';
+    const designatedPhone = prefs?.designatedPhone || targetShipment?.phoneTo || '(405) 555-0100';
+    const designatedEmail = prefs?.designatedEmail || targetShipment?.emailTo || 'intake@facility.com';
+
+    const sendSms = prefs?.sendSms ?? true;
+    const sendEmail = prefs?.sendEmail ?? true;
+
+    const generatedAlerts: ProviderNotification[] = [];
+
+    // Automated SMS Alert
+    if (sendSms && targetShipment) {
+      generatedAlerts.push({
+        id: `notif-sms-${Date.now()}`,
+        timestamp: 'Just Now',
+        channel: 'SMS',
+        recipient: `${designatedPhone} (${designatedName})`,
+        type: nextStatus === 'delivered' ? 'delivered_signature' : 'status_update',
+        title: `Automated SMS: Status ${statusLabels[nextStatus]}`,
+        message: `[MedVelo SMS Alert] Attn: ${designatedName}. Shipment ID ${trackingNumber} status updated to: ${statusLabels[nextStatus]}. Location: Oklahoma Medical Corridor. Temp: ${targetShipment.currentTempCelsius ?? 3.8}°C. Verified by Courier ${targetShipment.courier.name}.`,
+        isRead: false,
+        details: {
+          shipmentId: trackingNumber,
+          currentStatus: statusLabels[nextStatus],
+          facilityName: targetShipment.facilityTo,
+          contactPerson: designatedName,
+          phone: designatedPhone,
+        },
+      });
+    }
+
+    // Automated Email Alert
+    if (sendEmail && targetShipment) {
+      generatedAlerts.push({
+        id: `notif-email-${Date.now()}`,
+        timestamp: 'Just Now',
+        channel: 'Email',
+        recipient: designatedEmail,
+        type: nextStatus === 'delivered' ? 'delivered_signature' : 'status_update',
+        title: `Automated Email: Shipment ${trackingNumber} ${statusLabels[nextStatus]}`,
+        message: `Automated MedVelo dispatch notification for ${targetShipment.facilityTo}. Shipment ID: ${trackingNumber}. Current Status: ${statusLabels[nextStatus]}. Courier: ${targetShipment.courier.name} (${targetShipment.courier.badgeId}). Temperature: ${targetShipment.currentTempCelsius ?? 3.8}°C. Chain of Custody Token: ${targetShipment.patientRecordHandling.chainOfCustodyAuditCode}.`,
+        isRead: false,
+        details: {
+          shipmentId: trackingNumber,
+          currentStatus: statusLabels[nextStatus],
+          facilityName: targetShipment.facilityTo,
+          contactPerson: designatedName,
+          email: designatedEmail,
+        },
+      });
+    }
+
     setShipments((prev) =>
       prev.map((s) => {
         if (s.trackingNumber === trackingNumber) {
-          const statusLabels: Record<ShipmentStatus, string> = {
-            order_received: 'Order Received & Logged',
-            courier_dispatched: 'Courier En Route to Facility',
-            en_route_pickup: 'Courier Arrived at Facility Intake',
-            picked_up: 'Specimen Secured & Verified',
-            in_transit: 'In Transit with Active Telemetry',
-            delivered: 'Delivered & Dual-Party Signed',
-          };
-
           const newEvt = {
             id: `evt-${Date.now()}`,
             timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
             status: nextStatus,
             title: statusLabels[nextStatus],
-            description: `Shipment status progressed to ${nextStatus.replace('_', ' ')}. Chain of custody maintained.`,
+            description: `Shipment status progressed to ${nextStatus.replace('_', ' ')}. Automated provider SMS/Email dispatched to ${designatedName}. Chain of custody verified.`,
             location: 'Oklahoma Medical Transport Corridor',
             handlerName: s.courier.name,
             handlerRole: 'Certified Medical Logistics Courier',
@@ -129,45 +210,35 @@ export default function App() {
             tamperSealVerified: true,
           };
 
-          const newAlert: ProviderNotification = {
-            id: `notif-${Date.now()}`,
-            timestamp: 'Just Now',
-            channel: 'SMS',
-            recipient: s.phoneTo,
-            type: nextStatus === 'delivered' ? 'delivered_signature' : 'status_update',
-            title: `Status: ${statusLabels[nextStatus]}`,
-            message: `MedVelo Alert for ${s.facilityTo}: Package ${s.trackingNumber} status updated to ${statusLabels[nextStatus]}.`,
-            isRead: false,
-          };
-
           return {
             ...s,
             status: nextStatus,
             events: [...s.events, newEvt],
-            notifications: [newAlert, ...s.notifications],
+            notifications: [...generatedAlerts, ...s.notifications],
           };
         }
         return s;
       })
     );
 
-    // Also update global notifications
-    const targetShipment = shipments.find((s) => s.trackingNumber === trackingNumber);
-    if (targetShipment) {
-      setNotifications((prev) => [
-        {
-          id: `notif-${Date.now()}`,
-          timestamp: 'Just Now',
-          channel: 'SMS',
-          recipient: targetShipment.phoneTo,
-          type: nextStatus === 'delivered' ? 'delivered_signature' : 'status_update',
-          title: `Status: ${nextStatus.replace('_', ' ').toUpperCase()}`,
-          message: `MedVelo Alert for ${targetShipment.facilityTo}: Package ${targetShipment.trackingNumber} is now ${nextStatus.replace('_', ' ')}.`,
-          isRead: false,
-        },
-        ...prev,
-      ]);
+    // Global notifications feed
+    if (generatedAlerts.length > 0) {
+      setNotifications((prev) => [...generatedAlerts, ...prev]);
     }
+
+    // Trigger visual toast
+    setStatusToast({
+      show: true,
+      title: `Automated Alert Sent: ${statusLabels[nextStatus]}`,
+      message: `Notifications dispatched to ${designatedName}. Shipment ID: ${trackingNumber}, Status: ${statusLabels[nextStatus]}.`,
+      shipmentId: trackingNumber,
+      status: statusLabels[nextStatus],
+      recipient: designatedName,
+    });
+
+    setTimeout(() => {
+      setStatusToast(null);
+    }, 4500);
   };
 
   const handleMarkAllNotificationsRead = () => {
@@ -192,7 +263,7 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-white text-slate-900 flex flex-col selection:bg-sky-500 selection:text-white">
+    <div className="min-h-screen bg-white text-slate-900 flex flex-col selection:bg-sky-500 selection:text-white relative">
       {/* Sticky Top Navigation */}
       <Navbar
         activeSection={activeSection}
@@ -223,6 +294,8 @@ export default function App() {
           onAddNotification={handleAddNotification}
           onUpdateShipmentStatus={handleUpdateShipmentStatus}
           onRequestNewPickup={handleRequestPickupClick}
+          userCreatedTrackingId={userCreatedTrackingId}
+          onUpdateNotificationPreferences={handleUpdateNotificationPreferences}
         />
 
         {/* Section 3: About MedVelo */}
@@ -271,6 +344,43 @@ export default function App() {
         isOpen={isPartnerModalOpen}
         onClose={() => setIsPartnerModalOpen(false)}
       />
+
+      {/* Automated Status Notification Toast */}
+      {statusToast && (
+        <div
+          id="automated-status-toast"
+          className="fixed bottom-6 right-6 z-50 max-w-md w-full bg-slate-900 text-white rounded-2xl p-4 shadow-2xl border border-sky-500/40 flex items-start gap-3.5 transition-all duration-300"
+        >
+          <div className="w-10 h-10 rounded-xl bg-sky-500/20 text-sky-400 flex items-center justify-center shrink-0">
+            <Bell className="w-5 h-5 text-sky-400 animate-bounce" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-bold text-sky-400 uppercase tracking-wider flex items-center gap-1.5">
+                <span className="w-2 h-2 rounded-full bg-sky-400 animate-ping"></span>
+                Automated Alert Dispatched
+              </span>
+              <button
+                type="button"
+                onClick={() => setStatusToast(null)}
+                className="text-slate-400 hover:text-white text-xs cursor-pointer p-1"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <h5 className="font-bold text-sm text-white mt-1">{statusToast.title}</h5>
+            <p className="text-xs text-slate-300 mt-1 leading-relaxed">{statusToast.message}</p>
+            <div className="mt-2.5 flex items-center gap-2 text-[11px] text-slate-300 font-mono">
+              <span className="px-2 py-0.5 rounded bg-slate-800 border border-slate-700">
+                ID: {statusToast.shipmentId}
+              </span>
+              <span className="px-2 py-0.5 rounded bg-sky-950 text-sky-300 border border-sky-800/50">
+                {statusToast.status}
+              </span>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

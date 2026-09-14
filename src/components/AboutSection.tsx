@@ -11,7 +11,13 @@ import {
   MapPin,
   Clock,
   Building,
+  Camera,
+  Check,
 } from 'lucide-react';
+import medicalHeroImg from '../assets/images/medical_hero_courier_1789333071988.jpg';
+import specimenLabImg from '../assets/images/specimen_cold_chain_1789333082729.jpg';
+import pharmacyRxImg from '../assets/images/pharmacy_secure_rx_1789333093193.jpg';
+import statTransitImg from '../assets/images/stat_medical_transit_1789333103540.jpg';
 
 interface AboutSectionProps {
   onRequestPickup: () => void;
@@ -185,6 +191,138 @@ export const AboutSection: React.FC<AboutSectionProps> = ({
                 </div>
               );
             })}
+          </div>
+        </div>
+
+        {/* Clinical Operations Photo Showcase */}
+        <div className="pt-8 border-t border-slate-200 space-y-8">
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+            <div>
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-50 border border-sky-200 text-xs font-bold text-sky-800 uppercase tracking-wider mb-2">
+                <Camera className="w-3.5 h-3.5 text-sky-600" />
+                <span>Field Operations Gallery</span>
+              </div>
+              <h3 className="text-2xl sm:text-3xl font-black text-slate-900 font-display tracking-tight">
+                Medical Logistics in Action
+              </h3>
+              <p className="text-slate-600 text-sm mt-1 max-w-2xl">
+                A glimpse into our daily chain-of-custody protocols, temperature-controlled transport equipment, and certified medical courier operations across Oklahoma.
+              </p>
+            </div>
+            <div className="flex items-center gap-2 text-xs font-semibold text-slate-500">
+              <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+              <span>100% HIPAA & OSHA Certified Workflows</span>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {/* Photo 1 */}
+            <div className="rounded-2xl overflow-hidden bg-white border border-slate-200 shadow-sm hover:shadow-lg transition-all duration-300 group flex flex-col">
+              <div className="relative h-48 overflow-hidden bg-slate-100">
+                <img
+                  src={medicalHeroImg}
+                  alt="Certified medical courier outside hospital medical center entrance"
+                  referrerPolicy="no-referrer"
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                />
+                <div className="absolute top-2.5 right-2.5 px-2 py-0.5 rounded bg-slate-900/80 backdrop-blur-sm text-[10px] font-bold text-white uppercase tracking-wider">
+                  Field Courier
+                </div>
+              </div>
+              <div className="p-4 flex-1 flex flex-col justify-between">
+                <div>
+                  <h4 className="font-bold text-slate-900 text-sm">Hospital Intake & Dispatch</h4>
+                  <p className="text-xs text-slate-600 mt-1 leading-relaxed">
+                    Direct handoffs at major medical corridors, outpatient surgical suites, and trauma emergency bays.
+                  </p>
+                </div>
+                <div className="mt-3 pt-2 border-t border-slate-100 flex items-center gap-1.5 text-[11px] font-semibold text-sky-700">
+                  <Check className="w-3.5 h-3.5 text-emerald-600" />
+                  <span>Uniformed & HIPAA Badged</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Photo 2 */}
+            <div className="rounded-2xl overflow-hidden bg-white border border-slate-200 shadow-sm hover:shadow-lg transition-all duration-300 group flex flex-col">
+              <div className="relative h-48 overflow-hidden bg-slate-100">
+                <img
+                  src={specimenLabImg}
+                  alt="Clinical laboratory specimen coolers with barcode labeled test tubes"
+                  referrerPolicy="no-referrer"
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                />
+                <div className="absolute top-2.5 right-2.5 px-2 py-0.5 rounded bg-sky-950/80 backdrop-blur-sm text-[10px] font-bold text-sky-300 uppercase tracking-wider">
+                  Cold Chain
+                </div>
+              </div>
+              <div className="p-4 flex-1 flex flex-col justify-between">
+                <div>
+                  <h4 className="font-bold text-slate-900 text-sm">Laboratory Accessioning</h4>
+                  <p className="text-xs text-slate-600 mt-1 leading-relaxed">
+                    Continuous 2°C–8°C thermal telemetry, frozen -20°C chambers, and barcode-level specimen tracking.
+                  </p>
+                </div>
+                <div className="mt-3 pt-2 border-t border-slate-100 flex items-center gap-1.5 text-[11px] font-semibold text-sky-700">
+                  <Check className="w-3.5 h-3.5 text-emerald-600" />
+                  <span>UN3373 Category B Compliant</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Photo 3 */}
+            <div className="rounded-2xl overflow-hidden bg-white border border-slate-200 shadow-sm hover:shadow-lg transition-all duration-300 group flex flex-col">
+              <div className="relative h-48 overflow-hidden bg-slate-100">
+                <img
+                  src={pharmacyRxImg}
+                  alt="Secure tamper-evident medical delivery container for hospital pharmaceuticals"
+                  referrerPolicy="no-referrer"
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                />
+                <div className="absolute top-2.5 right-2.5 px-2 py-0.5 rounded bg-teal-950/80 backdrop-blur-sm text-[10px] font-bold text-teal-300 uppercase tracking-wider">
+                  Pharmacy Rx
+                </div>
+              </div>
+              <div className="p-4 flex-1 flex flex-col justify-between">
+                <div>
+                  <h4 className="font-bold text-slate-900 text-sm">Pharmacy & Vault Transport</h4>
+                  <p className="text-xs text-slate-600 mt-1 leading-relaxed">
+                    Tamper-evident locking vault cases and electronic dual-party verification for controlled medications.
+                  </p>
+                </div>
+                <div className="mt-3 pt-2 border-t border-slate-100 flex items-center gap-1.5 text-[11px] font-semibold text-sky-700">
+                  <Check className="w-3.5 h-3.5 text-emerald-600" />
+                  <span>DEA Chain of Custody</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Photo 4 */}
+            <div className="rounded-2xl overflow-hidden bg-white border border-slate-200 shadow-sm hover:shadow-lg transition-all duration-300 group flex flex-col">
+              <div className="relative h-48 overflow-hidden bg-slate-100">
+                <img
+                  src={statTransitImg}
+                  alt="Medical specimen transport cooler with digital temperature telemetry display reading 3.8C"
+                  referrerPolicy="no-referrer"
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                />
+                <div className="absolute top-2.5 right-2.5 px-2 py-0.5 rounded bg-amber-950/80 backdrop-blur-sm text-[10px] font-bold text-amber-300 uppercase tracking-wider">
+                  STAT Urgent
+                </div>
+              </div>
+              <div className="p-4 flex-1 flex flex-col justify-between">
+                <div>
+                  <h4 className="font-bold text-slate-900 text-sm">STAT Telemetry Coolers</h4>
+                  <p className="text-xs text-slate-600 mt-1 leading-relaxed">
+                    Intraoperative surgical biopsies and emergency pathology transport with real-time temperature loggers.
+                  </p>
+                </div>
+                <div className="mt-3 pt-2 border-t border-slate-100 flex items-center gap-1.5 text-[11px] font-semibold text-sky-700">
+                  <Check className="w-3.5 h-3.5 text-emerald-600" />
+                  <span>Real-Time Sensor Logging</span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>

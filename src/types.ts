@@ -29,6 +29,35 @@ export interface ChainOfCustodyEvent {
   signature?: string;
 }
 
+export interface GeoCoordinate {
+  lat: number;
+  lng: number;
+  label?: string;
+  address?: string;
+}
+
+export interface LiveVehicleTelemetry {
+  lat: number;
+  lng: number;
+  speedMph: number;
+  headingDeg: number;
+  streetName: string;
+  lastPingTime: string;
+  batteryLevel?: number;
+  gpsSignal: 'Excellent' | 'Good' | 'Fair';
+}
+
+export interface NotificationPreferences {
+  sendSms: boolean;
+  sendEmail: boolean;
+  designatedContactName: string;
+  designatedPhone: string;
+  designatedEmail: string;
+  notifyOnPickup: boolean;
+  notifyOnEnRoute: boolean;
+  notifyOnDelivery: boolean;
+}
+
 export interface ProviderNotification {
   id: string;
   timestamp: string;
@@ -44,6 +73,14 @@ export interface ProviderNotification {
   title: string;
   message: string;
   isRead: boolean;
+  details?: {
+    shipmentId: string;
+    currentStatus: string;
+    facilityName: string;
+    contactPerson: string;
+    phone?: string;
+    email?: string;
+  };
 }
 
 export interface Shipment {
@@ -52,10 +89,12 @@ export interface Shipment {
   facilityFrom: string;
   contactPersonFrom: string;
   phoneFrom: string;
+  emailFrom?: string;
   addressFrom: string;
   facilityTo: string;
   contactPersonTo: string;
   phoneTo: string;
+  emailTo?: string;
   addressTo: string;
   deliveryType: DeliveryType;
   priority: 'STAT Urgent (Under 60m)' | 'Priority Medical (2-3 Hours)' | 'Scheduled Routine';
@@ -89,6 +128,12 @@ export interface Shipment {
     signedAt: string;
     signatureDataUrl?: string;
   };
+  currentLocation: LiveVehicleTelemetry;
+  originLocation: GeoCoordinate;
+  destinationLocation: GeoCoordinate;
+  routeWaypoints: GeoCoordinate[];
+  currentWaypointIndex: number;
+  notificationPreferences: NotificationPreferences;
 }
 
 export interface PickupFormData {
@@ -105,4 +150,6 @@ export interface PickupFormData {
   requiresColdChain: boolean;
   isBiohazard: boolean;
   protectPatientRecords: boolean;
+  sendSmsNotifications: boolean;
+  sendEmailNotifications: boolean;
 }

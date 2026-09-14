@@ -48,6 +48,8 @@ export const RequestPickupSection: React.FC<RequestPickupSectionProps> = ({
     requiresColdChain: initialIsColdChain,
     isBiohazard: initialIsBiohazard,
     protectPatientRecords: true,
+    sendSmsNotifications: true,
+    sendEmailNotifications: true,
   });
 
   const [submittedShipment, setSubmittedShipment] = useState<Shipment | null>(null);
@@ -95,10 +97,12 @@ export const RequestPickupSection: React.FC<RequestPickupSectionProps> = ({
         facilityFrom: formData.facilityName,
         contactPersonFrom: formData.contactPerson,
         phoneFrom: formData.phone,
+        emailFrom: formData.email,
         addressFrom: formData.pickupAddress,
-        facilityTo: 'Destination Medical Center / Receiving Lab',
-        contactPersonTo: 'Attending Receiving Specialist',
+        facilityTo: 'Destination Medical Receiving Lab',
+        contactPersonTo: 'Attending Clinical Receiver',
         phoneTo: formData.phone,
+        emailTo: formData.email,
         addressTo: formData.deliveryAddress,
         deliveryType: formData.deliveryType as DeliveryType,
         priority: formData.isStatUrgent
@@ -128,6 +132,45 @@ export const RequestPickupSection: React.FC<RequestPickupSectionProps> = ({
           chainOfCustodyAuditCode: `COC-OKC-${randomSuffix}-A`,
         },
         specialInstructions: formData.notes || 'Handle with clinical chain of custody protocols.',
+        originLocation: {
+          lat: 35.488,
+          lng: -97.535,
+          label: formData.facilityName,
+          address: formData.pickupAddress,
+        },
+        destinationLocation: {
+          lat: 35.535,
+          lng: -97.51,
+          label: 'Receiving Medical Facility',
+          address: formData.deliveryAddress,
+        },
+        currentLocation: {
+          lat: 35.488,
+          lng: -97.535,
+          speedMph: 0,
+          headingDeg: 0,
+          streetName: formData.pickupAddress,
+          lastPingTime: 'Scheduled',
+          batteryLevel: 99,
+          gpsSignal: 'Excellent',
+        },
+        routeWaypoints: [
+          { lat: 35.488, lng: -97.535 },
+          { lat: 35.502, lng: -97.525 },
+          { lat: 35.518, lng: -97.515 },
+          { lat: 35.535, lng: -97.51 },
+        ],
+        currentWaypointIndex: 0,
+        notificationPreferences: {
+          sendSms: formData.sendSmsNotifications,
+          sendEmail: formData.sendEmailNotifications,
+          designatedContactName: formData.contactPerson,
+          designatedPhone: formData.phone,
+          designatedEmail: formData.email,
+          notifyOnPickup: true,
+          notifyOnEnRoute: true,
+          notifyOnDelivery: true,
+        },
         events: [
           {
             id: `evt-${Date.now()}-1`,
@@ -143,16 +186,48 @@ export const RequestPickupSection: React.FC<RequestPickupSectionProps> = ({
           },
         ],
         notifications: [
-          {
-            id: `notif-${Date.now()}`,
-            timestamp: 'Just Now',
-            channel: 'SMS',
-            recipient: formData.phone,
-            type: 'pickup_confirmed',
-            title: `Pickup Confirmed: ${trackingCode}`,
-            message: `MedVelo has received your pickup request for ${formData.facilityName}. Courier dispatch in progress.`,
-            isRead: false,
-          },
+          ...(formData.sendSmsNotifications
+            ? [
+                {
+                  id: `notif-sms-${Date.now()}`,
+                  timestamp: 'Just Now',
+                  channel: 'SMS' as const,
+                  recipient: `${formData.phone} (${formData.contactPerson})`,
+                  type: 'pickup_confirmed' as const,
+                  title: `Automated SMS: Pickup Scheduled (${trackingCode})`,
+                  message: `[MedVelo Alert] Pickup scheduled for ${formData.facilityName}. Shipment ID: ${trackingCode}. Attn: ${formData.contactPerson}. Courier Marcus Vance assigned. Track live: https://medvelocourier.com/track/${trackingCode}`,
+                  isRead: false,
+                  details: {
+                    shipmentId: trackingCode,
+                    currentStatus: 'Order Received / Pickup Scheduled',
+                    facilityName: formData.facilityName,
+                    contactPerson: formData.contactPerson,
+                    phone: formData.phone,
+                  },
+                },
+              ]
+            : []),
+          ...(formData.sendEmailNotifications
+            ? [
+                {
+                  id: `notif-email-${Date.now()}`,
+                  timestamp: 'Just Now',
+                  channel: 'Email' as const,
+                  recipient: formData.email,
+                  type: 'pickup_confirmed' as const,
+                  title: `Automated Email: Requisition Confirmed (${trackingCode})`,
+                  message: `Requisition confirmation for ${formData.facilityName}. Chain of custody code COC-OKC-${randomSuffix}-A generated.`,
+                  isRead: false,
+                  details: {
+                    shipmentId: trackingCode,
+                    currentStatus: 'Order Received / Pickup Scheduled',
+                    facilityName: formData.facilityName,
+                    contactPerson: formData.contactPerson,
+                    email: formData.email,
+                  },
+                },
+              ]
+            : []),
         ],
       };
 
@@ -178,6 +253,8 @@ export const RequestPickupSection: React.FC<RequestPickupSectionProps> = ({
       requiresColdChain: false,
       isBiohazard: false,
       protectPatientRecords: true,
+      sendSmsNotifications: true,
+      sendEmailNotifications: true,
     });
   };
 
@@ -231,14 +308,27 @@ export const RequestPickupSection: React.FC<RequestPickupSectionProps> = ({
               </p>
             </div>
 
+            {/* Automated Notification Status */}
+            <div className="max-w-md mx-auto p-3 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-600 flex items-center justify-between">
+              <span className="font-semibold text-slate-800 flex items-center gap-1.5">
+                <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                Automated Alerts Active
+              </span>
+              <span className="text-slate-500 font-mono text-[11px]">
+                {formData.sendSmsNotifications && 'SMS'}
+                {formData.sendSmsNotifications && formData.sendEmailNotifications && ' + '}
+                {formData.sendEmailNotifications && 'Email'}
+              </span>
+            </div>
+
             {/* Actions */}
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
               <button
-                id="track-new-shipment-btn"
+                id="view-pickup-on-realtime-map-btn"
                 onClick={() => onTrackNow(submittedShipment.trackingNumber)}
                 className="w-full sm:w-auto px-6 py-3 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-bold text-sm shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer"
               >
-                <span>Track This Shipment Live</span>
+                <span>View on Real-Time Map</span>
                 <ArrowRight className="w-4 h-4" />
               </button>
               <button
@@ -521,6 +611,41 @@ export const RequestPickupSection: React.FC<RequestPickupSectionProps> = ({
                 onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
                 className="w-full p-3 bg-slate-50 border border-slate-300 rounded-xl text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-600 focus:bg-white"
               ></textarea>
+            </div>
+
+            {/* Section 6: Automated Status Notifications */}
+            <div className="p-4 rounded-2xl bg-sky-50/70 border border-sky-200 space-y-2">
+              <span className="block text-xs font-bold uppercase tracking-wider text-sky-900">
+                Automated Healthcare Provider Notifications
+              </span>
+              <p className="text-xs text-sky-800">
+                Automatically dispatch real-time alerts to the facility contact when shipment status changes (picked up, en route, delivered):
+              </p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1 text-xs">
+                <label className="flex items-center gap-2 cursor-pointer font-semibold text-slate-800 bg-white p-2.5 rounded-xl border border-sky-200 shadow-xs">
+                  <input
+                    type="checkbox"
+                    checked={formData.sendSmsNotifications}
+                    onChange={(e) =>
+                      setFormData({ ...formData, sendSmsNotifications: e.target.checked })
+                    }
+                    className="w-4 h-4 rounded text-sky-600 focus:ring-sky-500 border-slate-300"
+                  />
+                  <span>Automated SMS text alerts</span>
+                </label>
+
+                <label className="flex items-center gap-2 cursor-pointer font-semibold text-slate-800 bg-white p-2.5 rounded-xl border border-sky-200 shadow-xs">
+                  <input
+                    type="checkbox"
+                    checked={formData.sendEmailNotifications}
+                    onChange={(e) =>
+                      setFormData({ ...formData, sendEmailNotifications: e.target.checked })
+                    }
+                    className="w-4 h-4 rounded text-sky-600 focus:ring-sky-500 border-slate-300"
+                  />
+                  <span>Automated Email notifications</span>
+                </label>
+              </div>
             </div>
 
             {/* Submit Button */}

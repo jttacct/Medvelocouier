@@ -13,6 +13,9 @@ import {
   CheckCircle,
 } from 'lucide-react';
 import { DeliveryType } from '../types';
+import specimenLabImg from '../assets/images/specimen_cold_chain_1789333082729.jpg';
+import pharmacyRxImg from '../assets/images/pharmacy_secure_rx_1789333093193.jpg';
+import statTransitImg from '../assets/images/stat_medical_transit_1789333103540.jpg';
 
 interface ServicesSectionProps {
   onRequestPickupForService: (serviceName: DeliveryType) => void;
@@ -31,6 +34,8 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({
       icon: FlaskConical,
       accent: 'from-sky-500 to-blue-600',
       badgeColor: 'bg-sky-50 text-sky-700 border-sky-200',
+      image: specimenLabImg,
+      imageAlt: 'High-tech temperature-regulated specimen transport coolers in clinical diagnostic laboratory',
       features: [
         'Continuous cold chain telemetry (2°C–8°C, Frozen -20°C, Ambient)',
         'OSHA Bloodborne Pathogens & UN3373 Category B compliant',
@@ -47,12 +52,32 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({
       icon: Pill,
       accent: 'from-teal-500 to-emerald-600',
       badgeColor: 'bg-teal-50 text-teal-700 border-teal-200',
+      image: pharmacyRxImg,
+      imageAlt: 'Secure tamper-evident medical delivery container for hospital pharmaceuticals',
       features: [
         'Strict DEA & Oklahoma Pharmacy Board chain of custody protocols',
         'Tamper-evident locking vault containers',
         'Electronic dual-party sign-off and delivery verification',
       ],
       tempSupport: 'Room Temp & Refrigerated Rx',
+    },
+    {
+      id: 'stat',
+      title: 'STAT & Urgent Delivery' as DeliveryType,
+      tagline: 'Emergency 60-Minute Response',
+      description:
+        'When timing matters most, MedVelo delivers with speed and precision.',
+      icon: Zap,
+      accent: 'from-amber-500 to-red-600',
+      badgeColor: 'bg-amber-50 text-amber-800 border-amber-200',
+      image: statTransitImg,
+      imageAlt: 'Active medical transport cooler with digital temperature telemetry display reading 3.8C',
+      features: [
+        'Dedicated direct point-to-point courier (no secondary stops)',
+        'Immediate dispatch within 15 minutes of call / online submission',
+        'Live GPS milestone pings to surgeons and attending providers',
+      ],
+      tempSupport: 'All Temperatures Available',
     },
     {
       id: 'equipment',
@@ -85,22 +110,6 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({
         'Legal medical chart, oncology imaging, and records archive handoff',
       ],
       tempSupport: 'Climate Protected',
-    },
-    {
-      id: 'stat',
-      title: 'STAT & Urgent Delivery' as DeliveryType,
-      tagline: 'Emergency 60-Minute Response',
-      description:
-        'When timing matters most, MedVelo delivers with speed and precision.',
-      icon: Zap,
-      accent: 'from-amber-500 to-red-600',
-      badgeColor: 'bg-amber-50 text-amber-800 border-amber-200',
-      features: [
-        'Dedicated direct point-to-point courier (no secondary stops)',
-        'Immediate dispatch within 15 minutes of call / online submission',
-        'Live GPS milestone pings to surgeons and attending providers',
-      ],
-      tempSupport: 'All Temperatures Available',
     },
     {
       id: 'route',
@@ -147,19 +156,42 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({
                 key={srv.id}
                 className="bg-white rounded-3xl border border-slate-200/90 shadow-sm hover:shadow-xl hover:border-slate-300 transition-all duration-200 flex flex-col justify-between overflow-hidden group"
               >
+                {/* Optional Medical Logistics Photo Header */}
+                {srv.image && (
+                  <div className="relative h-44 w-full overflow-hidden bg-slate-100">
+                    <img
+                      src={srv.image}
+                      alt={srv.imageAlt || srv.title}
+                      referrerPolicy="no-referrer"
+                      className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-slate-950/20 to-transparent"></div>
+                    <div className="absolute bottom-3 left-4 right-4 flex items-center justify-between">
+                      <span className="px-2.5 py-1 rounded-full bg-slate-900/85 backdrop-blur-md text-[11px] font-bold text-white border border-slate-700/80 shadow-sm">
+                        {srv.tagline}
+                      </span>
+                      <span className="text-[10px] font-mono text-emerald-300 bg-emerald-950/80 px-2 py-0.5 rounded border border-emerald-800/60 font-semibold">
+                        Certified Handoff
+                      </span>
+                    </div>
+                  </div>
+                )}
+
                 <div className="p-6 sm:p-7 space-y-4">
-                  {/* Top Icon & Tag */}
+                  {/* Top Icon & Tag (if no image, show full row) */}
                   <div className="flex items-center justify-between">
                     <div
                       className={`w-12 h-12 rounded-2xl bg-gradient-to-tr ${srv.accent} text-white flex items-center justify-center shadow-md`}
                     >
                       <Icon className="w-6 h-6" />
                     </div>
-                    <span
-                      className={`text-[11px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full border ${srv.badgeColor}`}
-                    >
-                      {srv.tagline}
-                    </span>
+                    {!srv.image && (
+                      <span
+                        className={`text-[11px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full border ${srv.badgeColor}`}
+                      >
+                        {srv.tagline}
+                      </span>
+                    )}
                   </div>
 
                   {/* Title & Description */}

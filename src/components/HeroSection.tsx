@@ -11,6 +11,7 @@ import {
   ChevronRight,
   Sparkles,
 } from 'lucide-react';
+import medicalHeroImg from '../assets/images/medical_hero_courier_1789333071988.jpg';
 
 interface HeroSectionProps {
   onRequestPickup: () => void;
@@ -192,9 +193,49 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
               {/* Decorative Card Rim */}
               <div className="absolute -inset-1 rounded-3xl bg-gradient-to-r from-sky-500 to-teal-400 opacity-20 blur-xl"></div>
 
-              <div className="relative rounded-2xl bg-slate-800/95 border border-slate-700 p-6 shadow-2xl space-y-6">
+              <div className="relative rounded-2xl bg-slate-800/95 border border-slate-700 p-5 sm:p-6 shadow-2xl space-y-5 overflow-hidden">
+                {/* Real Medical Logistics Photo Banner */}
+                <div className="relative -mx-5 -mt-5 sm:-mx-6 sm:-mt-6 h-44 sm:h-48 overflow-hidden group">
+                  <img
+                    id="hero-courier-live-img"
+                    src={medicalHeroImg}
+                    alt="Certified MedVelo medical courier transporting temperature-regulated specimen case at hospital entrance"
+                    referrerPolicy="no-referrer"
+                    className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/40 to-transparent"></div>
+
+                  {/* Badges on Top of Photo */}
+                  <div className="absolute top-3 left-3 flex items-center gap-2">
+                    <span className="px-2.5 py-1 rounded-full bg-slate-900/85 backdrop-blur-md border border-slate-700/80 text-[11px] font-bold text-sky-300 flex items-center gap-1.5 shadow-md">
+                      <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                      Active Field Courier
+                    </span>
+                  </div>
+
+                  <div className="absolute top-3 right-3">
+                    <span className="px-2.5 py-1 rounded-full bg-slate-900/85 backdrop-blur-md border border-slate-700/80 text-[11px] font-mono text-emerald-300 shadow-md">
+                      GPS Signal: Strong
+                    </span>
+                  </div>
+
+                  <div className="absolute bottom-3 left-4 right-4 flex items-end justify-between">
+                    <div>
+                      <p className="text-[10px] font-mono uppercase tracking-wider text-sky-400 font-bold">
+                        Transit Corridor
+                      </p>
+                      <h4 className="text-white text-sm font-extrabold drop-shadow-sm font-display">
+                        Oklahoma Health Center Network
+                      </h4>
+                    </div>
+                    <span className="px-2 py-1 rounded-md bg-slate-900/90 border border-slate-700 text-[11px] font-mono font-bold text-amber-300">
+                      ETA 14m
+                    </span>
+                  </div>
+                </div>
+
                 {/* Card Header */}
-                <div className="flex items-center justify-between border-b border-slate-700 pb-4">
+                <div className="flex items-center justify-between border-b border-slate-700 pb-3">
                   <div className="flex items-center gap-3">
                     <div className="w-9 h-9 rounded-lg bg-sky-500/20 text-sky-400 flex items-center justify-center font-bold">
                       <Sparkles className="w-5 h-5" />
