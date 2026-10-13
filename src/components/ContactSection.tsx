@@ -18,9 +18,36 @@ export const ContactSection: React.FC = () => {
     facility: '',
     email: '',
     phone: '',
-    subject: 'General Logistics Inquiry',
+    department: 'dispatch@medvelocourier.com',
     message: '',
   });
+
+  const departmentEmails = [
+    {
+      id: 'dispatch',
+      name: 'Dispatch & Operations',
+      email: 'dispatch@medvelocourier.com',
+      badge: 'Urgent / STAT',
+      badgeColor: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30',
+      description: 'Active courier dispatches, live STAT route expediting, chain-of-custody tracking',
+    },
+    {
+      id: 'billing',
+      name: 'Billing & Accounting',
+      email: 'billing@medvelocourier.com',
+      badge: 'Accounts',
+      badgeColor: 'bg-amber-500/20 text-amber-300 border-amber-500/30',
+      description: 'Invoices, facility contract terms, billing questions & BAA verification',
+    },
+    {
+      id: 'info',
+      name: 'General Inquiries',
+      email: 'info@medvelocourier.com',
+      badge: 'Client Care',
+      badgeColor: 'bg-sky-500/20 text-sky-300 border-sky-500/30',
+      description: 'New clinic onboarding, routine questions, and general customer support',
+    },
+  ];
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -32,7 +59,7 @@ export const ContactSection: React.FC = () => {
         facility: '',
         email: '',
         phone: '',
-        subject: 'General Logistics Inquiry',
+        department: 'dispatch@medvelocourier.com',
         message: '',
       });
     }, 4000);
@@ -51,8 +78,7 @@ export const ContactSection: React.FC = () => {
             Contact MedVelo
           </h2>
           <p className="text-base sm:text-lg text-slate-600">
-            We’re here to support your medical delivery needs. Speak directly with our Oklahoma dispatch
-            desk or send us an inquiry.
+            Direct communication channels for Oklahoma healthcare providers. Reach our dispatch desk, billing department, or general support team.
           </p>
         </div>
 
@@ -68,86 +94,146 @@ export const ContactSection: React.FC = () => {
                   Oklahoma City Operations
                 </h3>
                 <p className="text-xs text-slate-300">
-                  Real-time clinical courier coordination and STAT emergency delivery routing.
+                  Real-time clinical courier coordination, cold-chain transport, and STAT emergency delivery routing.
                 </p>
               </div>
 
-              <div className="space-y-4 pt-4 border-t border-slate-800 text-sm">
-                {/* Phone */}
+              {/* Phone / Hotline */}
+              <div className="pt-4 border-t border-slate-800">
                 <div className="flex items-start gap-4">
-                  <div className="w-10 h-10 rounded-xl bg-sky-500/20 text-sky-400 flex items-center justify-center shrink-0 border border-sky-500/30">
+                  <div className="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0 border border-emerald-500/30">
                     <Phone className="w-5 h-5" />
                   </div>
                   <div>
-                    <span className="text-xs text-slate-400 block font-medium">Phone / STAT Hotline</span>
+                    <span className="text-xs text-slate-400 block font-medium">STAT Hotline & Phone</span>
                     <a
                       id="contact-phone-link"
                       href="tel:4056379609"
-                      className="text-lg font-bold text-white hover:text-sky-300 transition-colors font-mono"
+                      className="text-lg font-bold text-white hover:text-emerald-300 transition-colors font-mono"
                     >
                       (405) 637-9609
                     </a>
-                  </div>
-                </div>
-
-                {/* Email */}
-                <div className="flex items-start gap-4">
-                  <div className="w-10 h-10 rounded-xl bg-indigo-500/20 text-indigo-400 flex items-center justify-center shrink-0 border border-indigo-500/30">
-                    <Mail className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <span className="text-xs text-slate-400 block font-medium">Email Inquiries</span>
-                    <a
-                      id="contact-email-link"
-                      href="mailto:info@MedVeloCourier.com"
-                      className="text-base font-semibold text-white hover:text-sky-300 transition-colors"
-                    >
-                      info@MedVeloCourier.com
-                    </a>
-                  </div>
-                </div>
-
-                {/* Website */}
-                <div className="flex items-start gap-4">
-                  <div className="w-10 h-10 rounded-xl bg-teal-500/20 text-teal-400 flex items-center justify-center shrink-0 border border-teal-500/30">
-                    <Globe className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <span className="text-xs text-slate-400 block font-medium">Official Website</span>
-                    <span className="text-base font-semibold text-white font-mono">
-                      MedVeloCourier.com
+                    <span className="block text-[11px] text-emerald-400 font-semibold mt-0.5">
+                      Available 24/7 for urgent healthcare dispatches
                     </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Official Departmental Email Directory */}
+              <div className="space-y-3 pt-4 border-t border-slate-800">
+                <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider font-mono block">
+                  Department Email Directory
+                </span>
+
+                {/* Dispatch Email */}
+                <div className="p-3.5 rounded-2xl bg-slate-800/80 border border-slate-700/80 hover:border-sky-500/50 transition-colors">
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-xs font-bold text-sky-300 flex items-center gap-1.5">
+                      <Mail className="w-3.5 h-3.5" />
+                      Dispatch & Operations
+                    </span>
+                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-semibold font-mono">
+                      STAT / Live Runs
+                    </span>
+                  </div>
+                  <a
+                    id="contact-email-dispatch"
+                    href="mailto:dispatch@medvelocourier.com"
+                    className="text-sm font-bold text-white hover:text-sky-300 transition-colors font-mono block"
+                  >
+                    dispatch@medvelocourier.com
+                  </a>
+                  <p className="text-[11px] text-slate-400 mt-1">
+                    Pickup requests, urgent specimen routing & live driver status.
+                  </p>
+                </div>
+
+                {/* Billing Email */}
+                <div className="p-3.5 rounded-2xl bg-slate-800/80 border border-slate-700/80 hover:border-amber-500/50 transition-colors">
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-xs font-bold text-amber-300 flex items-center gap-1.5">
+                      <Mail className="w-3.5 h-3.5" />
+                      Billing & Accounts
+                    </span>
+                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 font-semibold font-mono">
+                      Accounting
+                    </span>
+                  </div>
+                  <a
+                    id="contact-email-billing"
+                    href="mailto:billing@medvelocourier.com"
+                    className="text-sm font-bold text-white hover:text-amber-300 transition-colors font-mono block"
+                  >
+                    billing@medvelocourier.com
+                  </a>
+                  <p className="text-[11px] text-slate-400 mt-1">
+                    Invoices, facility accounts, payment terms & BAA records.
+                  </p>
+                </div>
+
+                {/* General Info Email */}
+                <div className="p-3.5 rounded-2xl bg-slate-800/80 border border-slate-700/80 hover:border-indigo-500/50 transition-colors">
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-xs font-bold text-indigo-300 flex items-center gap-1.5">
+                      <Mail className="w-3.5 h-3.5" />
+                      General Inquiries
+                    </span>
+                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 font-semibold font-mono">
+                      Client Support
+                    </span>
+                  </div>
+                  <a
+                    id="contact-email-info"
+                    href="mailto:info@medvelocourier.com"
+                    className="text-sm font-bold text-white hover:text-indigo-300 transition-colors font-mono block"
+                  >
+                    info@medvelocourier.com
+                  </a>
+                  <p className="text-[11px] text-slate-400 mt-1">
+                    General questions, practice onboarding & courier services overview.
+                  </p>
+                </div>
+              </div>
+
+              {/* Service Details Footer */}
+              <div className="space-y-3 pt-4 border-t border-slate-800 text-xs">
+                {/* Website */}
+                <div className="flex items-start gap-3">
+                  <Globe className="w-4 h-4 text-teal-400 shrink-0 mt-0.5" />
+                  <div>
+                    <span className="text-slate-400 block">Official Website</span>
+                    <a
+                      href="https://medvelocourier.com"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="font-bold text-white hover:text-teal-300 font-mono"
+                    >
+                      MedVeloCourier.com
+                    </a>
                   </div>
                 </div>
 
                 {/* Service Area */}
-                <div className="flex items-start gap-4">
-                  <div className="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0 border border-emerald-500/30">
-                    <MapPin className="w-5 h-5" />
-                  </div>
+                <div className="flex items-start gap-3">
+                  <MapPin className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
                   <div>
-                    <span className="text-xs text-slate-400 block font-medium">Service Area</span>
-                    <span className="text-sm font-semibold text-white">
-                      Oklahoma City & surrounding regions
-                    </span>
-                    <p className="text-xs text-slate-400 mt-0.5">
-                      OKC Metro, Edmond, Norman, Moore, Yukon, Midwest City, and statewide medical transfer corridors.
+                    <span className="text-slate-400 block">Service Area</span>
+                    <span className="font-semibold text-white">Oklahoma City & surrounding regions</span>
+                    <p className="text-[11px] text-slate-400 mt-0.5">
+                      OKC Metro, Edmond, Norman, Moore, Yukon, Midwest City & statewide medical transfer corridors.
                     </p>
                   </div>
                 </div>
 
                 {/* Business Hours */}
-                <div className="flex items-start gap-4">
-                  <div className="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center shrink-0 border border-amber-500/30">
-                    <Clock className="w-5 h-5" />
-                  </div>
+                <div className="flex items-start gap-3">
+                  <Clock className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
                   <div>
-                    <span className="text-xs text-slate-400 block font-medium">Business Hours</span>
-                    <span className="text-sm font-bold text-white">
-                      Mon–Fri: 7 AM – 7 PM
-                    </span>
-                    <span className="block text-xs font-semibold text-amber-400 mt-0.5">
-                      (STAT available 24/7)
+                    <span className="text-slate-400 block">Business Hours</span>
+                    <span className="font-semibold text-white">Mon–Fri: 7 AM – 7 PM</span>
+                    <span className="block text-[11px] font-semibold text-amber-400">
+                      (STAT courier dispatch active 24/7/365)
                     </span>
                   </div>
                 </div>
@@ -160,27 +246,58 @@ export const ContactSection: React.FC = () => {
             <div className="space-y-2">
               <h3 className="text-xl font-bold text-slate-900 font-display flex items-center gap-2">
                 <MessageSquare className="w-5 h-5 text-sky-600" />
-                <span>Send Our Dispatch Team a Message</span>
+                <span>Send Our Team a Direct Message</span>
               </h3>
               <p className="text-xs text-slate-600">
-                Have questions regarding scheduled route contracts, compliance documentation, or billing?
-                Let us know.
+                Choose the department you need to reach and our Oklahoma medical logistics staff will respond promptly.
               </p>
             </div>
 
             {sent ? (
-              <div className="p-6 rounded-2xl bg-emerald-50 border border-emerald-200 text-center space-y-3">
+              <div className="p-8 rounded-2xl bg-emerald-50 border border-emerald-200 text-center space-y-3">
                 <div className="w-12 h-12 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto">
                   <CheckCircle2 className="w-6 h-6" />
                 </div>
-                <h4 className="text-base font-bold text-slate-900">Message Received</h4>
+                <h4 className="text-base font-bold text-slate-900">Message Dispatched</h4>
                 <p className="text-xs text-slate-600 max-w-sm mx-auto">
-                  Thank you for reaching out to MedVelo. A medical logistics coordinator will follow up
-                  shortly.
+                  Thank you for contacting MedVelo. Your message has been routed to{' '}
+                  <span className="font-mono font-bold text-slate-900">{form.department}</span>.
+                  A coordinator will follow up shortly.
                 </p>
               </div>
             ) : (
-              <form onSubmit={handleSubmit} className="space-y-4">
+              <form onSubmit={handleSubmit} className="space-y-5">
+                {/* Department Selection */}
+                <div className="space-y-2">
+                  <label className="block text-xs font-bold text-slate-700">
+                    Route Message to Department
+                  </label>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                    {departmentEmails.map((dept) => {
+                      const isSelected = form.department === dept.email;
+                      return (
+                        <button
+                          key={dept.id}
+                          type="button"
+                          onClick={() => setForm({ ...form, department: dept.email })}
+                          className={`p-3 rounded-xl text-left border transition-all cursor-pointer ${
+                            isSelected
+                              ? 'bg-sky-50 border-sky-600 ring-2 ring-sky-600/20'
+                              : 'bg-white border-slate-200 hover:border-slate-300'
+                          }`}
+                        >
+                          <div className="flex items-center justify-between mb-1">
+                            <span className="text-xs font-bold text-slate-900">{dept.name}</span>
+                          </div>
+                          <span className="text-[11px] font-mono text-sky-700 font-semibold block truncate">
+                            {dept.email}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-1.5">
                     <label htmlFor="contactName" className="block text-xs font-bold text-slate-700">
@@ -243,31 +360,36 @@ export const ContactSection: React.FC = () => {
                 </div>
 
                 <div className="space-y-1.5">
-                  <label htmlFor="contactMessage" className="block text-xs font-bold text-slate-700">
-                    How can we support your facility?
-                  </label>
+                  <div className="flex items-center justify-between">
+                    <label htmlFor="contactMessage" className="block text-xs font-bold text-slate-700">
+                      How can we support your facility?
+                    </label>
+                    <span className="text-[11px] text-slate-500">
+                      Routing to: <span className="font-mono font-semibold text-sky-700">{form.department}</span>
+                    </span>
+                  </div>
                   <textarea
                     id="contactMessage"
                     rows={4}
                     required
-                    placeholder="Provide details regarding your medical transport volume, route frequency, or specific handling requirements..."
+                    placeholder="Provide details regarding your medical transport volume, route frequency, billing inquiry, or specific handling requirements..."
                     value={form.message}
                     onChange={(e) => setForm({ ...form, message: e.target.value })}
                     className="w-full p-3.5 bg-white border border-slate-300 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-sky-600"
                   ></textarea>
                 </div>
 
-                <div className="flex items-center justify-between pt-2">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pt-2">
                   <span className="text-[11px] text-slate-500">
-                    Confidential medical courier coordination.
+                    Confidential medical courier coordination · HIPAA secure.
                   </span>
                   <button
                     id="submit-contact-form-btn"
                     type="submit"
-                    className="px-6 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs shadow-md transition-colors flex items-center gap-2 cursor-pointer"
+                    className="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs shadow-md transition-colors flex items-center justify-center gap-2 cursor-pointer"
                   >
                     <Send className="w-3.5 h-3.5" />
-                    <span>Send Inquiry</span>
+                    <span>Send to {form.department.split('@')[0]}</span>
                   </button>
                 </div>
               </form>

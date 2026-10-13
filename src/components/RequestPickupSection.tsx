@@ -273,6 +273,16 @@ export const RequestPickupSection: React.FC<RequestPickupSectionProps> = ({
           <p className="text-base text-slate-600 max-w-2xl mx-auto">
             Complete the form below and MedVelo will contact you shortly to confirm your pickup.
           </p>
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-slate-900 text-white text-xs font-medium">
+            <span className="text-emerald-400 font-bold">STAT Emergency?</span>
+            <span className="text-slate-300">Call (405) 637-9609 or email</span>
+            <a
+              href="mailto:dispatch@medvelocourier.com"
+              className="text-sky-300 hover:text-white font-mono font-bold underline"
+            >
+              dispatch@medvelocourier.com
+            </a>
+          </div>
         </div>
 
         {/* Confirmation Modal if Submitted */}

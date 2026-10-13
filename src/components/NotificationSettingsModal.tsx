@@ -400,6 +400,11 @@ export const NotificationSettingsModal: React.FC<NotificationSettingsModalProps>
                       Courier: {shipment.courier.name} (Badge {shipment.courier.badgeId}) · Cold
                       Chain Sensor: {shipment.currentTempCelsius ?? 3.8}°C
                     </p>
+                    <div className="pt-2 border-t border-slate-200 text-[10px] text-slate-500 flex flex-wrap gap-x-3 gap-y-1">
+                      <span>Dispatch: <strong className="text-slate-700">dispatch@medvelocourier.com</strong></span>
+                      <span>Billing: <strong className="text-slate-700">billing@medvelocourier.com</strong></span>
+                      <span>Support: <strong className="text-slate-700">info@medvelocourier.com</strong></span>
+                    </div>
                   </div>
                 </div>
               </div>

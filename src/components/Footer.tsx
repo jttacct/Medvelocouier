@@ -106,36 +106,68 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate, onRequestPickup }) =
           {/* Contact Dispatch Col */}
           <div className="space-y-4">
             <h4 className="text-xs font-bold uppercase tracking-wider text-slate-300 font-mono">
-              Emergency & Dispatch
+              Contact & Departments
             </h4>
-            <div className="space-y-2.5 text-xs text-slate-300">
+            <div className="space-y-3 text-xs text-slate-300">
               <a
                 id="footer-phone"
                 href="tel:4056379609"
-                className="flex items-center gap-2 text-sky-400 hover:text-sky-300 font-mono text-sm font-bold"
+                className="flex items-center gap-2 text-emerald-400 hover:text-emerald-300 font-mono text-sm font-bold"
               >
                 <Phone className="w-4 h-4 text-emerald-400" />
                 <span>(405) 637-9609</span>
               </a>
 
-              <a
-                id="footer-email"
-                href="mailto:info@MedVeloCourier.com"
-                className="flex items-center gap-2 hover:text-white"
-              >
-                <Mail className="w-4 h-4 text-slate-400" />
-                <span>info@MedVeloCourier.com</span>
-              </a>
+              {/* Departmental Emails */}
+              <div className="space-y-1.5 pt-1">
+                <div>
+                  <span className="text-[10px] uppercase font-bold text-slate-500 block">Dispatch / STAT</span>
+                  <a
+                    id="footer-email-dispatch"
+                    href="mailto:dispatch@medvelocourier.com"
+                    className="flex items-center gap-1.5 text-sky-400 hover:text-sky-300 font-mono text-[11px] font-medium"
+                  >
+                    <Mail className="w-3.5 h-3.5 text-sky-400 shrink-0" />
+                    <span>dispatch@medvelocourier.com</span>
+                  </a>
+                </div>
 
-              <p className="flex items-center gap-2 text-slate-400">
-                <MapPin className="w-4 h-4 text-slate-500 shrink-0" />
-                <span>Oklahoma City & surrounding regions</span>
-              </p>
+                <div>
+                  <span className="text-[10px] uppercase font-bold text-slate-500 block">Billing & Accounts</span>
+                  <a
+                    id="footer-email-billing"
+                    href="mailto:billing@medvelocourier.com"
+                    className="flex items-center gap-1.5 text-amber-400 hover:text-amber-300 font-mono text-[11px] font-medium"
+                  >
+                    <Mail className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                    <span>billing@medvelocourier.com</span>
+                  </a>
+                </div>
 
-              <p className="flex items-center gap-2 text-slate-400">
-                <Clock className="w-4 h-4 text-slate-500 shrink-0" />
-                <span>Mon–Fri: 7 AM – 7 PM (STAT 24/7)</span>
-              </p>
+                <div>
+                  <span className="text-[10px] uppercase font-bold text-slate-500 block">General Support</span>
+                  <a
+                    id="footer-email-info"
+                    href="mailto:info@medvelocourier.com"
+                    className="flex items-center gap-1.5 text-slate-300 hover:text-white font-mono text-[11px] font-medium"
+                  >
+                    <Mail className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                    <span>info@medvelocourier.com</span>
+                  </a>
+                </div>
+              </div>
+
+              <div className="pt-1 border-t border-slate-900 space-y-1">
+                <p className="flex items-center gap-2 text-slate-400 text-[11px]">
+                  <MapPin className="w-3.5 h-3.5 text-slate-500 shrink-0" />
+                  <span>Oklahoma City & surrounding regions</span>
+                </p>
+
+                <p className="flex items-center gap-2 text-slate-400 text-[11px]">
+                  <Clock className="w-3.5 h-3.5 text-slate-500 shrink-0" />
+                  <span>Mon–Fri: 7 AM – 7 PM (STAT 24/7)</span>
+                </p>
+              </div>
             </div>
           </div>
         </div>

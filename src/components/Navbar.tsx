@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ShieldCheck, Phone, Bell, Menu, X, Clock, MapPin, Activity } from 'lucide-react';
+import { ShieldCheck, Phone, Bell, Menu, X, Clock, MapPin, Activity, Mail } from 'lucide-react';
 import { ProviderNotification } from '../types';
 
 interface NavbarProps {
@@ -224,6 +224,14 @@ export const Navbar: React.FC<NavbarProps> = ({
             >
               <Phone className="w-4 h-4 text-emerald-600" />
               Call Dispatch: (405) 637-9609
+            </a>
+            <a
+              id="mobile-email-dispatch-btn"
+              href="mailto:dispatch@medvelocourier.com"
+              className="flex items-center justify-center gap-2 py-1.5 text-slate-600 hover:text-slate-900 font-mono text-xs"
+            >
+              <Mail className="w-3.5 h-3.5 text-sky-600" />
+              dispatch@medvelocourier.com
             </a>
           </div>
         </div>

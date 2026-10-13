@@ -156,17 +156,29 @@ export const PartnerModal: React.FC<PartnerModalProps> = ({ isOpen, onClose }) =
               ></textarea>
             </div>
 
-            <div className="pt-2 flex items-center justify-between border-t border-slate-150">
-              <span className="text-[11px] text-slate-500 flex items-center gap-1">
-                <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-                Custom BAA execution available
-              </span>
-              <button
-                type="submit"
-                className="px-5 py-2.5 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs shadow-md transition-colors"
-              >
-                Submit Partner Profile
-              </button>
+            <div className="pt-2 space-y-2 border-t border-slate-150">
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] text-slate-500 flex items-center gap-1">
+                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+                  Custom BAA execution available
+                </span>
+                <button
+                  type="submit"
+                  className="px-5 py-2.5 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs shadow-md transition-colors cursor-pointer"
+                >
+                  Submit Partner Profile
+                </button>
+              </div>
+              <p className="text-[11px] text-slate-500 text-center pt-1">
+                Prefer email? Reach logistics at{' '}
+                <a href="mailto:dispatch@medvelocourier.com" className="font-mono text-sky-700 font-bold underline">
+                  dispatch@medvelocourier.com
+                </a>{' '}
+                or contracts at{' '}
+                <a href="mailto:billing@medvelocourier.com" className="font-mono text-amber-700 font-bold underline">
+                  billing@medvelocourier.com
+                </a>
+              </p>
             </div>
           </form>
         )}

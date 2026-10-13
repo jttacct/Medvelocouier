@@ -443,14 +443,34 @@ export const PricingSection: React.FC<PricingSectionProps> = ({
 
         {/* Custom Hospital / Route Quote Banner */}
         <div className="p-8 rounded-3xl bg-sky-50 border border-sky-100 flex flex-col sm:flex-row sm:items-center justify-between gap-6">
-          <div className="space-y-1">
+          <div className="space-y-2">
             <h3 className="text-xl font-bold text-slate-900 font-display">
               Need Contract Recurring Daily Routes or Large Hospital Quotes?
             </h3>
-            <p className="text-sm text-slate-600">
-              We offer volume contracted pricing for Oklahoma hospital systems, outpatient laboratory chains,
-              and multi-facility clinic groups.
+            <p className="text-sm text-slate-600 max-w-2xl">
+              We offer volume contracted pricing and monthly consolidated invoicing for Oklahoma hospital systems, outpatient laboratory chains, and multi-facility clinic groups.
             </p>
+            <div className="flex flex-wrap items-center gap-4 pt-1 text-xs text-slate-600">
+              <span className="flex items-center gap-1.5 font-medium">
+                Billing & Accounts:
+                <a
+                  href="mailto:billing@medvelocourier.com"
+                  className="font-mono font-bold text-sky-700 hover:text-sky-900 underline"
+                >
+                  billing@medvelocourier.com
+                </a>
+              </span>
+              <span className="text-slate-300">•</span>
+              <span className="flex items-center gap-1.5 font-medium">
+                Direct Dispatch:
+                <a
+                  href="mailto:dispatch@medvelocourier.com"
+                  className="font-mono font-bold text-sky-700 hover:text-sky-900 underline"
+                >
+                  dispatch@medvelocourier.com
+                </a>
+              </span>
+            </div>
           </div>
           <button
             id="custom-quote-cta-btn"
